@@ -9529,7 +9529,7 @@ msgstr ""
 #: lms/templates/forgot_password_modal.html
 #: lms/templates/forgot_password_modal.html
 msgid "Password Reset"
-msgstr "Зміна пароля"
+msgstr "Змінити пароль"
 
 #: lms/templates/forgot_password_modal.html
 msgid ""
@@ -16108,7 +16108,7 @@ msgid ""
 "<strong>webcam is plugged in, turned on, and allowed to function in your web"
 " browser (commonly adjustable in your browser settings)</strong>"
 msgstr ""
-"Будь ласка, переконайтесь, що ваш браузер оновлено <strong>{a_start}most до "
+"Будь ласка, переконайтесь, що ваш браузер оновлено <strong>{a_start}до "
 "найбільш актуальної версії{a_end}</strong>. Також переконайтесь, що ваша "
 "<strong>вебкамера під'єднана, увімкнена та може працювати в браузері "
 "(зазвичай це налаштовується в опціях браузера)</strong>"
@@ -16158,8 +16158,8 @@ msgid ""
 "turned on, and allowed to function in your web browser (commonly adjustable "
 "in your browser settings).</strong>"
 msgstr ""
-"Будь ласка, переконайтесь, що ваш браузер оновлено {a_start}most до найбільш"
-" актуальної версії{a_end}. Також переконайтесь, що ваша <strong>вебкамера "
+"Будь ласка, переконайтесь, що ваш браузер оновлено {a_start}до найбільш "
+"актуальної версії{a_end}. Також переконайтесь, що ваша <strong>вебкамера "
 "під'єднана, увімкнена та може працювати в браузері (зазвичай це "
 "налаштовується в опціях браузера)</strong>"
 
