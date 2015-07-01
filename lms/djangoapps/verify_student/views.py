@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
 """
 Views for the verification flow
 
 """
+import base64
+import sha
 import json
 import logging
 import decimal
@@ -728,7 +731,7 @@ def create_order(request):
     cart = Order.get_cart_for_user(request.user)
     cart.clear()
     enrollment_mode = current_mode.slug
-    CertificateItem.add_to_order(cart, course_id, amount, enrollment_mode)
+    CertificateItem.add_to_order(cart, course_id, amount, enrollment_mode, currency=current_mode.currency)
 
     # Change the order's status so that we don't accidentally modify it later.
     # We need to do this to ensure that the parameters we send to the payment system
@@ -749,8 +752,51 @@ def create_order(request):
         extra_data=[unicode(course_id), current_mode.slug]
     )
 
-    params['success'] = True
+    #params['success'] = True
+    #return HttpResponse(json.dumps(params), content_type="text/json")
+
+    processor = settings.CC_PROCESSOR.get(settings.CC_PROCESSOR_NAME, {})
+
+    callback_data = {
+        "description": "Верифікований сертифікат", 
+        "order_id": cart.id, 
+        "server_url": processor.get("SERVER_URL", ""), 
+        "currency": processor.get("CURRENCY", ""), 
+        "result_url": processor.get("RESULT_URL", ""), 
+        "public_key": processor.get("PUBLIC_KEY", ""),
+        "language": processor.get("LANGUAGE", "en"),
+        "pay_way": processor.get("PAY_WAY", ""), 
+        "amount": current_mode.min_price, 
+        "sandbox": processor.get("SANDBOX", 0), 
+        "version": processor.get("VERSION", 3), 
+        "type": "buy"
+    }
+    log.warn(json.dumps(callback_data))
+
+#    callback_data = {
+#        "description": "Верифікований сертифікат", 
+#        "order_id": cart.id, 
+#        "server_url": "http://courses.prometheus.org.ua/shoppingcart/postpay_callback/", 
+#        "currency": "UAH", 
+#        "result_url": "http://courses.prometheus.org.ua/shoppingcart/postpay_callback/", 
+#        "public_key": "", 
+#        "language": "en", 
+#        "pay_way": "card,liqpay,privat24", 
+#        "amount": "5", 
+#        "sandbox": "1", 
+#        "version": 3, 
+#        "type": "buy"
+#    }
+
+    callback_data = base64.b64encode(json.dumps(callback_data))
+    private_key = processor.get("PRIVATE_KEY", "")
+    callback_signature = base64.b64encode(sha.new(private_key + callback_data + private_key).digest())
+ 
+    params['data'] = callback_data
+    params['signature'] = callback_signature
+
     return HttpResponse(json.dumps(params), content_type="text/json")
+
 
 
 @require_POST

@@ -14,6 +14,7 @@ def get_visible_courses():
 
     courses = [c for c in _courses
                if isinstance(c, CourseDescriptor)]
+    courses = [c for c in _courses if c.catalog_visibility!="none"]
     courses = sorted(courses, key=lambda course: course.number)
 
     subdomain = microsite.get_value('subdomain', 'default')

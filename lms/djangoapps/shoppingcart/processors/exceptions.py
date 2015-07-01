@@ -24,3 +24,12 @@ class CCProcessorUserCancelled(CCProcessorException):
 class CCProcessorUserDeclined(CCProcessorException):
     """Transaction declined."""
     pass
+
+
+class CCProcessorFailedTransaction(CCProcessorException):
+    pass
+
+
+class CCProcessorPrivateKeyAbsenceException(CCProcessorException):
+    pass
+

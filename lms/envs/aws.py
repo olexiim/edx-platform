@@ -42,7 +42,9 @@ TEMPLATE_DEBUG = False
 
 EMAIL_BACKEND = 'django_ses.SESBackend'
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+#DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+MEDIA_ROOT = '/edx/var/edxapp/uploads'
 
 # IMPORTANT: With this enabled, the server must always be behind a proxy that
 # strips the header HTTP_X_FORWARDED_PROTO from client requests. Otherwise,
@@ -492,3 +494,18 @@ PDF_RECEIPT_LOGO_HEIGHT_MM = ENV_TOKENS.get('PDF_RECEIPT_LOGO_HEIGHT_MM', PDF_RE
 PDF_RECEIPT_COBRAND_LOGO_HEIGHT_MM = ENV_TOKENS.get(
     'PDF_RECEIPT_COBRAND_LOGO_HEIGHT_MM', PDF_RECEIPT_COBRAND_LOGO_HEIGHT_MM
 )
+
+# NEWSLETTER
+INSTALLED_APPS += ('django_extensions','sorl.thumbnail','newsletter',)
+NEWSLETTER_CONFIRM_EMAIL = False
+
+FEATURES['ENABLE_PAYMENT_FAKE'] = False
+#CC_PROCESSOR_NAME = 'LiqPay'
+#CC_PROCESSOR = {
+#    'LiqPay': {
+#        "PURCHASE_ENDPOINT": 'https://www.liqpay.com/api/checkout/',
+#        "SECRET_KEY": ""
+#    }
+#}
+SECRET_KEY = 'a'
+

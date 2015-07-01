@@ -13,6 +13,11 @@ request to the view with param "success"
 set to "success" or "failure".  The view defaults to payment success.
 """
 
+import json
+import base64
+import sha
+
+
 from django.views.generic.base import View
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse, HttpResponseBadRequest
@@ -24,6 +29,8 @@ from edxmako.shortcuts import render_to_response
 # to avoid duplicating that code.
 from shoppingcart.processors.CyberSource2 import processor_hash
 
+import logging
+log = logging.getLogger("shoppingcart")
 
 class PaymentFakeView(View):
     """
@@ -63,11 +70,12 @@ class PaymentFakeView(View):
         equivalent to the CyberSource payment page, even though it's
         served by the shopping cart app.
         """
-        if self._is_signature_valid(request.POST):
-            return self._payment_page_response(request.POST)
+        log.info("REQUEST POST FAKE: %s", request.POST)
+        # if self._is_signature_valid(request.POST):
+        return self._payment_page_response(request.POST)
 
-        else:
-            return render_to_response('shoppingcart/test/fake_payment_error.html')
+        # else:
+        #     return render_to_response('shoppingcart/test/fake_payment_error.html')
 
     def put(self, request):
         """
@@ -194,6 +202,8 @@ class PaymentFakeView(View):
             for key in signed_fields
         ])
         resp_params['signature'] = processor_hash(hash_val)
+
+
 
         return resp_params
 

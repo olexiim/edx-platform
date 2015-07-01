@@ -1,3 +1,4 @@
+<%! from django.conf import settings %>
 <%! from django.utils.translation import ugettext as _ %>
 
 <%inherit file="../main.html" />
@@ -247,7 +248,7 @@
                 <tfoot>
                   <tr>
                     <th scope="row" class="total-label" colspan="1">${_("Total")}</th>
-                    <td class="total-value" colspan="3"><span class="value-amount">${"{0:0.2f}".format(order.total_cost)}</span> <span class="value-currency">(${item.currency.upper()})</span></td>
+                    <td class="total-value" colspan="3"><span class="value-amount">${"{0:0.2f}".format(order.total_cost)}</span> <span class="value-currency">(${order.currency.upper()})</span></td>
                   </tr>
                 </tfoot>
               </table>

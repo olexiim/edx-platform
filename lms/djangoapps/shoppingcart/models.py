@@ -404,11 +404,13 @@ class Order(models.Model):
 
                 if csv_file:
                     email.attach(u'RegistrationCodesRedemptionUrls.csv', csv_file.getvalue(), 'text/csv')
-                if pdf_file is not None:
-                    email.attach(u'Receipt.pdf', pdf_file.getvalue(), 'application/pdf')
-                else:
-                    file_buffer = StringIO.StringIO(_('pdf download unavailable right now, please contact support.'))
-                    email.attach(u'pdf_not_available.txt', file_buffer.getvalue(), 'text/plain')
+                
+                # Right now we at Prometheus do not need additional receipts 
+                # if pdf_file is not None:
+                #     email.attach(u'Receipt.pdf', pdf_file.getvalue(), 'application/pdf')
+                # else:
+                #     file_buffer = StringIO.StringIO(_('pdf download unavailable right now, please contact support.'))
+                #     email.attach(u'pdf_not_available.txt', file_buffer.getvalue(), 'text/plain')
                 email.send()
         except (smtplib.SMTPException, BotoServerError):  # sadly need to handle diff. mail backends individually
             log.error('Failed sending confirmation e-mail for order %d', self.id)  # pylint: disable=no-member
@@ -445,7 +447,7 @@ class Order(models.Model):
         self.bill_to_state = state
         self.bill_to_country = country
         self.bill_to_postalcode = postalcode
-        if settings.FEATURES['STORE_BILLING_INFO']:
+        if settings.FEATURES.get('STORE_BILLING_INFO', False):
             self.bill_to_street1 = street1
             self.bill_to_street2 = street2
             self.bill_to_ccnum = ccnum

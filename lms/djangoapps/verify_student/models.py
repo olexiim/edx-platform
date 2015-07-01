@@ -14,6 +14,7 @@ import functools
 import json
 import logging
 import uuid
+import os
 
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
@@ -652,6 +653,15 @@ class SoftwareSecurePhotoVerification(PhotoVerification):
         # verification functionality. If you do want to work on it, you have to
         # explicitly enable these in your private settings.
         if settings.FEATURES.get('AUTOMATIC_VERIFY_STUDENT_IDENTITY_FOR_TESTING'):
+            img_name = uuid.uuid1().hex + '.png'
+            img_path = '{0}/verification_photos/face'.format(settings.STATIC_ROOT)
+            if not os.path.exists(img_path):
+                os.makedirs(img_path)
+            with open('{0}/{1}'.format(img_path, img_name), "wb") as f:
+                f.write(img_data)
+            self.face_image_url = '{0}verification_photos/face/{1}'.format(settings.STATIC_URL, img_name)
+            self.save()
+
             return
 
         aes_key_str = settings.VERIFY_STUDENT["SOFTWARE_SECURE"]["FACE_IMAGE_AES_KEY"]
@@ -690,6 +700,15 @@ class SoftwareSecurePhotoVerification(PhotoVerification):
         # verification functionality. If you do want to work on it, you have to
         # explicitly enable these in your private settings.
         if settings.FEATURES.get('AUTOMATIC_VERIFY_STUDENT_IDENTITY_FOR_TESTING'):
+            img_name = uuid.uuid1().hex + '.png'
+            img_path = '{0}/verification_photos/photo_id'.format(settings.STATIC_ROOT)
+            if not os.path.exists(img_path):
+                os.makedirs(img_path)
+            with open('{0}/{1}'.format(img_path, img_name), "wb") as f:
+                f.write(img_data)
+            self.photo_id_image_url = '{0}verification_photos/photo_id/{1}'.format(settings.STATIC_URL, img_name)
+            self.save()
+
             return
 
         aes_key = random_aes_key()
@@ -767,6 +786,7 @@ class SoftwareSecurePhotoVerification(PhotoVerification):
         We dynamically generate this, since we want it the expiration clock to
         start when the message is created, not when the record is created.
         """
+        log.warning("Image url generation")
         s3_key = self._generate_s3_key(name)
         return s3_key.generate_url(self.IMAGE_LINK_DURATION)
 
@@ -794,6 +814,7 @@ class SoftwareSecurePhotoVerification(PhotoVerification):
         request, we're also using RSA encryption to encrypt the AES key for
         faces.
         """
+        log.warning("_encrypted_user_photo_key_str")
         face_aes_key_str = settings.VERIFY_STUDENT["SOFTWARE_SECURE"]["FACE_IMAGE_AES_KEY"]
         face_aes_key = face_aes_key_str.decode("hex")
         rsa_key_str = settings.VERIFY_STUDENT["SOFTWARE_SECURE"]["RSA_PUBLIC_KEY"]
@@ -803,6 +824,7 @@ class SoftwareSecurePhotoVerification(PhotoVerification):
 
     def create_request(self):
         """return headers, body_dict"""
+        log.warning("create_request")
         access_key = settings.VERIFY_STUDENT["SOFTWARE_SECURE"]["API_ACCESS_KEY"]
         secret_key = settings.VERIFY_STUDENT["SOFTWARE_SECURE"]["API_SECRET_KEY"]
 
@@ -839,6 +861,7 @@ class SoftwareSecurePhotoVerification(PhotoVerification):
         rendering of the request that would be sent across, without actually
         sending anything.
         """
+        log.warning("request_message_txt")
         headers, body = self.create_request()
 
         header_txt = "\n".join(
@@ -878,3 +901,20 @@ class SoftwareSecurePhotoVerification(PhotoVerification):
         log.debug("Return message:\n\n{}\n\n".format(response.text))
 
         return response
+
+    def face_image(self):
+        if self.face_image_url:
+            return '<img src="%s" width="250"/>' % self.face_image_url
+        else:
+            return '<img src="" width="250" alt="Can not display preview"/>'
+    face_image.allow_tags = True
+    face_image.short_description = "Face Image"
+
+    def photo_id_image(self):
+        if self.photo_id_image_url:
+            return '<img src="%s" width="250"/>' % self.photo_id_image_url
+        else:
+            return '<img src="" width="250" alt="Can not display preview"/>'
+    photo_id_image.allow_tags = True
+    photo_id_image.short_description = "Photo Id Image"
+

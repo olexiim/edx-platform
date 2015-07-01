@@ -5,6 +5,7 @@ import pytz
 from django.db.models import Q
 from django.conf import settings
 from django.contrib.auth.models import Group
+from django.contrib.auth import get_user
 from django.http import (
     HttpResponse, HttpResponseRedirect, HttpResponseNotFound,
     HttpResponseBadRequest, HttpResponseForbidden, Http404
@@ -562,7 +563,8 @@ def donate(request):
 
 
 @csrf_exempt
-@require_POST
+#@require_POST
+@require_http_methods(["GET", "POST"])
 def postpay_callback(request):
     """
     Receives the POST-back from processor.
@@ -573,7 +575,13 @@ def postpay_callback(request):
     If unsuccessful the order will be left untouched and HTML messages giving more detailed error info will be
     returned.
     """
-    params = request.POST.dict()
+    #params = request.POST.dict()
+    params = (request.POST.dict() if request.method == "POST" else request.GET.dict())
+    log.info("REQUEST %s: %s", request.method, str(request))
+    log.info("SESSION %s: %s", request.method, request.session.items())
+    AUDIT_LOG.info("USER ID: %s", str(request.user.id))
+    params['user'] = get_user(request)
+    params['method'] = request.method
     result = process_postpay_callback(params)
     if result['success']:
         return HttpResponseRedirect(reverse('shoppingcart.views.show_receipt', args=[result['order'].id]))
@@ -816,7 +824,7 @@ def _show_receipt_html(request, order):
         'currency': settings.PAID_COURSE_REGISTRATION_CURRENCY[0],
         'total_registration_codes': total_registration_codes,
         'reg_code_info_list': reg_code_info_list,
-        'order_purchase_date': order.purchase_time.strftime("%B %d, %Y"),
+        'order_purchase_date': order.purchase_time.strftime("%B %d, %Y") if order.purchase_time else None,
     }
     # we want to have the ability to override the default receipt page when
     # there is only one item in the order
