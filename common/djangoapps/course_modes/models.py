@@ -62,6 +62,8 @@ class CourseMode(models.Model):
     # Modes that allow a student to pursue a verified certificate
     VERIFIED_MODES = ["verified", "professional"]
 
+    NON_VERIFIED_MODES = ['honor', 'audit']
+
     class Meta:
         """ meta attributes of this model """
         unique_together = ('course_id', 'mode_slug', 'currency')
