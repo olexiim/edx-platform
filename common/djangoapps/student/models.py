@@ -1412,7 +1412,7 @@ def enforce_single_login(sender, request, user, signal, **kwargs):    # pylint: 
         else:
             key = None
 
-        if user.profile:
+        if user and user.profile:
             user.profile.set_login_session(key)
 
 
