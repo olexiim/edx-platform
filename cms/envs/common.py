@@ -141,6 +141,9 @@ FEATURES = {
 
     # Toggle course entrance exams feature
     'ENTRANCE_EXAMS': False,
+
+    # Deny access to no-staff for course creation
+    'DISABLE_COURSE_CREATION': True,
 }
 
 ENABLE_JASMINE = False
