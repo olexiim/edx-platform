@@ -583,7 +583,7 @@ def postpay_callback(request):
     params['user'] = get_user(request)
     params['method'] = request.method
     result = process_postpay_callback(params)
-    if result['success']:
+    if result and result['success']:
         return HttpResponseRedirect(reverse('shoppingcart.views.show_receipt', args=[result['order'].id]))
     else:
         return render_to_response('shoppingcart/error.html', {'order': result['order'],
