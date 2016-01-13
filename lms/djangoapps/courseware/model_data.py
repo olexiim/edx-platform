@@ -16,7 +16,7 @@ from opaque_keys.edx.keys import CourseKey
 from opaque_keys.edx.block_types import BlockTypeKeyV1
 from opaque_keys.edx.asides import AsideUsageKeyV1
 
-from django.db import DatabaseError
+from django.db import DatabaseError, IntegrityError
 
 from xblock.runtime import KeyValueStore
 from xblock.exceptions import KeyValueMultiSaveError, InvalidScopeError
@@ -275,15 +275,22 @@ class FieldDataCache(object):
             return field_object
 
         if key.scope == Scope.user_state:
-            field_object, __ = StudentModule.objects.get_or_create(
-                course_id=self.course_id,
-                student_id=key.user_id,
-                module_state_key=key.block_scope_id,
-                defaults={
-                    'state': json.dumps({}),
-                    'module_type': key.block_scope_id.block_type,
-                },
-            )
+            try:
+                field_object, __ = StudentModule.objects.get_or_create(
+                    course_id=self.course_id,
+                    student_id=key.user_id,
+                    module_state_key=key.block_scope_id,
+                    defaults={
+                        'state': json.dumps({}),
+                        'module_type': key.block_scope_id.block_type,
+                    },
+                )
+            except IntegrityError:
+                field_object = StudentModule.objects.get(
+                    course_id=self.course_id,
+                    student_id=key.user_id,
+                    module_state_key=key.block_scope_id
+                )
         elif key.scope == Scope.user_state_summary:
             field_object, __ = XModuleUserStateSummaryField.objects.get_or_create(
                 field_name=key.field_name,
