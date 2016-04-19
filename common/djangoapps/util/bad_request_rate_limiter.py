@@ -15,6 +15,7 @@ class BadRequestRateLimiter(RateLimitMixin):
         Returns if the client has been rated limited
         """
         counts = self.get_counters(request)
+        return False
         return sum(counts.values()) >= self.requests
 
     def tick_bad_request_counter(self, request):
